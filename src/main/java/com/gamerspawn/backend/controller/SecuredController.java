@@ -20,7 +20,7 @@ public class SecuredController {
     }
 
     @GetMapping("/private/home")
-    public String privateGreetings(@RequestParam(value = "name", defaultValue = "World") String name) {
+    public String privateGreetings(@RequestParam(value = "name", defaultValue = "AUTHENTICATED_USER") String name) {
         return "Hello " + name;
     }
 }
