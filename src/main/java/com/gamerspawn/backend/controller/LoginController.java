@@ -7,6 +7,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.nio.charset.StandardCharsets;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @RestController
 public class LoginController {
@@ -23,17 +27,32 @@ public class LoginController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/login")
-    public String login(
+        @PostMapping("/login")
+    public ResponseEntity<String> login(
             @RequestParam("user") String username,
             @RequestParam("encryptedPass") String encryptedPass) {
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        if (!passwordEncoder.matches(encryptedPass, userDetails.getPassword())) {
-            throw new RuntimeException("Invalid login");
+        if (username == null || username.isBlank() || username.length() > 50
+                || encryptedPass == null || encryptedPass.isEmpty()
+                || encryptedPass.getBytes(StandardCharsets.UTF_8).length > 72) {
+            return invalidCredentials();
         }
 
-        return jwtAuthenticationConfig.getJWTToken(userDetails);
+        UserDetails userDetails;
+        try {
+            userDetails = userDetailsService.loadUserByUsername(username);
+        } catch (UsernameNotFoundException exception) {
+            return invalidCredentials();
+        }
+
+        if (!passwordEncoder.matches(encryptedPass, userDetails.getPassword())) {
+            return invalidCredentials();
+        }
+
+        return ResponseEntity.ok(jwtAuthenticationConfig.getJWTToken(userDetails));
+    }
+
+    private ResponseEntity<String> invalidCredentials() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
     }
 }

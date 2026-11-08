@@ -1,0 +1,186 @@
+package com.gamerspawn.backend.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+public class Event {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+    private LocalDate eventDate;
+    private LocalTime eventTime;
+    private String location;
+    private String accessLink;
+    private String eventType;
+    private String videoGame;
+    private String category;
+    private String country;
+    private String city;
+    private String modality;
+    private String description;
+    private String organizer;
+    private String participationRequirements;
+    private String registrationInformation;
+    private String imageUrl;
+
+    @ElementCollection
+    @CollectionTable(name = "event_photos", joinColumns = @JoinColumn(name = "event_id"))
+    private List<String> photoUrls = new ArrayList<>();
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public LocalDate getEventDate() {
+        return eventDate;
+    }
+
+    public void setEventDate(LocalDate eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public LocalTime getEventTime() {
+        return eventTime;
+    }
+
+    public void setEventTime(LocalTime eventTime) {
+        this.eventTime = eventTime;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getAccessLink() {
+        return accessLink;
+    }
+
+    public void setAccessLink(String accessLink) {
+        this.accessLink = accessLink;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public String getVideoGame() {
+        return videoGame;
+    }
+
+    public void setVideoGame(String videoGame) {
+        this.videoGame = videoGame;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getModality() {
+        return modality;
+    }
+
+    public void setModality(String modality) {
+        this.modality = modality;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
+    }
+
+    public String getParticipationRequirements() {
+        return participationRequirements;
+    }
+
+    public void setParticipationRequirements(String participationRequirements) {
+        this.participationRequirements = participationRequirements;
+    }
+
+    public String getRegistrationInformation() {
+        return registrationInformation;
+    }
+
+    public void setRegistrationInformation(String registrationInformation) {
+        this.registrationInformation = registrationInformation;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public List<String> getPhotoUrls() {
+        return photoUrls;
+    }
+
+    public void setPhotoUrls(List<String> photoUrls) {
+        this.photoUrls = photoUrls;
+    }
+}
