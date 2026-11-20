@@ -9,6 +9,8 @@ public interface EventRepository extends CrudRepository<Event, Long> {
 
     List<Event> findAllByOrderByEventDateAsc();
 
+    List<Event> findByCreatedByUsernameOrderByEventDateAsc(String username);
+
     List<Event> findByTitleContainingIgnoreCaseAndVideoGameContainingIgnoreCaseAndEventTypeContainingIgnoreCaseAndCategoryContainingIgnoreCaseAndCountryContainingIgnoreCaseAndCityContainingIgnoreCaseAndModalityContainingIgnoreCaseAndEventDateGreaterThanEqualOrderByEventDateAsc(
             String title,
             String videoGame,
