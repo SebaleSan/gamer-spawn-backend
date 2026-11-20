@@ -39,7 +39,7 @@ ejecutar desde la carpeta `backend`:
 docker exec -i mysql-gamerspawn mysql -uroot -ppassword < database\gamerspawn.sql
 ```
 
-El script recrea las tablas `event` y `event_photos`. Los usuarios y sus
+El script recrea las tablas `event` y `event_media`. Los usuarios y sus
 contraseñas son generados por `DataSeeder` al iniciar la aplicación.
 
 ## 2. Generar y configurar la clave JWT

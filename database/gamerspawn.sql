@@ -4,6 +4,7 @@ USE gamerspawn;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS event_photos;
+DROP TABLE IF EXISTS event_media;
 DROP TABLE IF EXISTS event_comment;
 DROP TABLE IF EXISTS event_rating;
 DROP TABLE IF EXISTS event;
@@ -40,11 +41,19 @@ CREATE TABLE event (
     PRIMARY KEY (id)
 ) ENGINE = InnoDB;
 
-CREATE TABLE event_photos (
+CREATE TABLE event_media (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    type VARCHAR(10) NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    created_at DATETIME NOT NULL,
     event_id BIGINT NOT NULL,
-    photo_urls VARCHAR(255),
-    CONSTRAINT fk_event_photos_event
-        FOREIGN KEY (event_id) REFERENCES event (id)
+    user_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT chk_event_media_type CHECK (type IN ('PHOTO', 'VIDEO')),
+    CONSTRAINT fk_event_media_event
+        FOREIGN KEY (event_id) REFERENCES event (id),
+    CONSTRAINT fk_event_media_user
+        FOREIGN KEY (user_id) REFERENCES user (id)
 ) ENGINE = InnoDB;
 
 CREATE TABLE event_comment (
@@ -139,13 +148,13 @@ INSERT INTO event (
      'Entrada general disponible en la puerta del evento.',
      'Retro Arcade Night', 'Street Fighter II');
 
-INSERT INTO event_photos (event_id, photo_urls) VALUES
-    (1, '/images/events/6a9c6c917ffebef7796971aa_ZONA-GAMER-INICIO.jpg'),
-    (2, '/images/events/organizar-evento-gaming.jpg'),
-    (3, '/images/events/300-nodonueve-imagen.webp'),
-    (4, '/images/events/e6e6d1_87f0220d52334452bea9a7cecbd722b3~mv2.png'),
-    (5, '/images/events/DSC6686.jpg'),
-    (6, '/images/events/FOTOS-BARBB-1.jpg'),
-    (7, '/images/events/captura-de-pantalla-2023-09-15-a-las-19.56.10.png');
+INSERT INTO event_media (event_id, type, url, created_at) VALUES
+    (1, 'PHOTO', '/images/events/6a9c6c917ffebef7796971aa_ZONA-GAMER-INICIO.jpg', NOW()),
+    (2, 'PHOTO', '/images/events/organizar-evento-gaming.jpg', NOW()),
+    (3, 'PHOTO', '/images/events/300-nodonueve-imagen.webp', NOW()),
+    (4, 'PHOTO', '/images/events/e6e6d1_87f0220d52334452bea9a7cecbd722b3~mv2.png', NOW()),
+    (5, 'PHOTO', '/images/events/DSC6686.jpg', NOW()),
+    (6, 'PHOTO', '/images/events/FOTOS-BARBB-1.jpg', NOW()),
+    (7, 'PHOTO', '/images/events/captura-de-pantalla-2023-09-15-a-las-19.56.10.png', NOW());
 
 ALTER TABLE event AUTO_INCREMENT = 8;
