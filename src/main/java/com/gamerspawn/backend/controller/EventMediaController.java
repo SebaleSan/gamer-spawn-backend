@@ -7,8 +7,8 @@ import com.gamerspawn.backend.entity.User;
 import com.gamerspawn.backend.repository.EventMediaRepository;
 import com.gamerspawn.backend.repository.EventRepository;
 import com.gamerspawn.backend.repository.UserRepository;
+import com.gamerspawn.backend.validation.SafeUrls;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -78,7 +78,7 @@ public class EventMediaController {
             @RequestBody MediaRequest request,
             Authentication authentication) {
         if (request == null || request.type() == null) {
-            throw badRequest("El tipo debe ser PHOTO o VIDEO.");
+            throw SafeUrls.badRequest("El tipo debe ser PHOTO o VIDEO.");
         }
         String url = normalizeUrl(request.type(), request.url());
         Event event = findEvent(eventId);
@@ -111,27 +111,7 @@ public class EventMediaController {
     }
 
     static String normalizeUrl(MediaType type, String rawUrl) {
-        if (rawUrl == null || rawUrl.isBlank()) {
-            throw badRequest("La URL no puede estar vacía.");
-        }
-
-        String url = rawUrl.trim();
-        if (url.length() > MAX_URL_LENGTH) {
-            throw badRequest("La URL no puede superar los " + MAX_URL_LENGTH + " caracteres.");
-        }
-
-        URI uri;
-        try {
-            uri = new URI(url);
-        } catch (URISyntaxException exception) {
-            throw badRequest("La URL tiene un formato inválido.");
-        }
-
-        if (!"https".equalsIgnoreCase(uri.getScheme())
-                || uri.getHost() == null
-                || uri.getRawUserInfo() != null) {
-            throw badRequest("La URL debe comenzar con https://.");
-        }
+        URI uri = SafeUrls.requireHttps(rawUrl, MAX_URL_LENGTH);
 
         if (type == MediaType.VIDEO) {
             return YOUTUBE_EMBED_URL + extractYoutubeId(uri);
@@ -158,7 +138,7 @@ public class EventMediaController {
         }
 
         if (videoId == null || !YOUTUBE_ID.matcher(videoId).matches()) {
-            throw badRequest("El video debe ser un enlace válido de YouTube.");
+            throw SafeUrls.badRequest("El video debe ser un enlace válido de YouTube.");
         }
         return videoId;
     }
@@ -187,10 +167,6 @@ public class EventMediaController {
                     "Usuario no encontrado.");
         }
         return user;
-    }
-
-    private static ResponseStatusException badRequest(String message) {
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
 
     private MediaResponse toMediaResponse(EventMedia media) {
