@@ -1,9 +1,11 @@
-CREATE DATABASE gamerspawn;
+CREATE DATABASE IF NOT EXISTS gamerspawn;
 
 USE gamerspawn;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS event_photos;
+DROP TABLE IF EXISTS event_comment;
+DROP TABLE IF EXISTS event_rating;
 DROP TABLE IF EXISTS event;
 DROP TABLE IF EXISTS user;
 SET FOREIGN_KEY_CHECKS = 1;
@@ -43,6 +45,36 @@ CREATE TABLE event_photos (
     photo_urls VARCHAR(255),
     CONSTRAINT fk_event_photos_event
         FOREIGN KEY (event_id) REFERENCES event (id)
+) ENGINE = InnoDB;
+
+CREATE TABLE event_comment (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    content VARCHAR(1000) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    event_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_event_comment_event
+        FOREIGN KEY (event_id) REFERENCES event (id),
+    CONSTRAINT fk_event_comment_user
+        FOREIGN KEY (user_id) REFERENCES user (id)
+) ENGINE = InnoDB;
+
+CREATE TABLE event_rating (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    score INTEGER NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    event_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_event_rating_event_user UNIQUE (event_id, user_id),
+    CONSTRAINT chk_event_rating_score CHECK (score BETWEEN 1 AND 5),
+    CONSTRAINT fk_event_rating_event
+        FOREIGN KEY (event_id) REFERENCES event (id),
+    CONSTRAINT fk_event_rating_user
+        FOREIGN KEY (user_id) REFERENCES user (id)
 ) ENGINE = InnoDB;
 
 INSERT INTO event (
