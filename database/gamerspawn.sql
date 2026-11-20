@@ -38,7 +38,10 @@ CREATE TABLE event (
     registration_information VARCHAR(255),
     title VARCHAR(255),
     video_game VARCHAR(255),
-    PRIMARY KEY (id)
+    created_by BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_event_created_by
+        FOREIGN KEY (created_by) REFERENCES user (id)
 ) ENGINE = InnoDB;
 
 CREATE TABLE event_media (
