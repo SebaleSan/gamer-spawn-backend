@@ -96,7 +96,7 @@ La respuesta es un token JWT. Cópiar para las siguientes solicitudes.
 ### Endpoint público
 
 ```text
-GET http://localhost:8081/api/public/home
+GET http://localhost:8081/api/events
 ```
 
 No requiere token.
@@ -104,7 +104,7 @@ No requiere token.
 ### Endpoint privado
 
 ```text
-GET http://localhost:8081/api/private/home
+GET http://localhost:8081/api/private/events
 ```
 
 En Postman seleccionar **Authorization > Bearer Token** y pegar el JWT recibido.
