@@ -17,7 +17,9 @@ CREATE TABLE user (
     password VARCHAR(255),
     role VARCHAR(255),
     username VARCHAR(255),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT uk_user_username UNIQUE (username),
+    CONSTRAINT uk_user_email UNIQUE (email)
 ) ENGINE = InnoDB;
 
 CREATE TABLE event (
