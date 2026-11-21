@@ -6,10 +6,12 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import com.gamerspawn.backend.entity.Event;
+import com.gamerspawn.backend.entity.EventMedia;
 import com.gamerspawn.backend.entity.User;
+import com.gamerspawn.backend.repository.EventMediaRepository;
 import com.gamerspawn.backend.repository.EventRepository;
 import com.gamerspawn.backend.repository.UserRepository;
 
@@ -18,14 +20,17 @@ public class DataSeeder implements ApplicationRunner {
 
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final EventMediaRepository eventMediaRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataSeeder(
             UserRepository userRepository,
             EventRepository eventRepository,
+            EventMediaRepository eventMediaRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
+        this.eventMediaRepository = eventMediaRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -209,7 +214,20 @@ public class DataSeeder implements ApplicationRunner {
         event.setParticipationRequirements(participationRequirements);
         event.setRegistrationInformation(registrationInformation);
         event.setImageUrl(imageUrl);
-        event.setPhotoUrls(List.of(imageUrl));
-        eventRepository.save(event);
+        Event savedEvent = eventRepository.save(event);
+        createPhotoIfAbsent(savedEvent, imageUrl);
+    }
+
+    private void createPhotoIfAbsent(Event event, String url) {
+        if (eventMediaRepository.existsByEventIdAndUrl(event.getId(), url)) {
+            return;
+        }
+
+        EventMedia photo = new EventMedia();
+        photo.setEvent(event);
+        photo.setType(EventMedia.MediaType.PHOTO);
+        photo.setUrl(url);
+        photo.setCreatedAt(LocalDateTime.now());
+        eventMediaRepository.save(photo);
     }
 }

@@ -39,7 +39,7 @@ ejecutar desde la carpeta `backend`:
 docker exec -i mysql-gamerspawn mysql -uroot -ppassword < database\gamerspawn.sql
 ```
 
-El script recrea las tablas `event` y `event_photos`. Los usuarios y sus
+El script recrea las tablas `event` y `event_media`. Los usuarios y sus
 contraseñas son generados por `DataSeeder` al iniciar la aplicación.
 
 ## 2. Generar y configurar la clave JWT
@@ -96,7 +96,7 @@ La respuesta es un token JWT. Cópiar para las siguientes solicitudes.
 ### Endpoint público
 
 ```text
-GET http://localhost:8081/api/public/home
+GET http://localhost:8081/api/events
 ```
 
 No requiere token.
@@ -104,7 +104,7 @@ No requiere token.
 ### Endpoint privado
 
 ```text
-GET http://localhost:8081/api/private/home
+GET http://localhost:8081/api/private/events
 ```
 
 En Postman seleccionar **Authorization > Bearer Token** y pegar el JWT recibido.

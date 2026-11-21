@@ -1,16 +1,15 @@
 package com.gamerspawn.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class Event {
@@ -36,9 +35,10 @@ public class Event {
     private String registrationInformation;
     private String imageUrl;
 
-    @ElementCollection
-    @CollectionTable(name = "event_photos", joinColumns = @JoinColumn(name = "event_id"))
-    private List<String> photoUrls = new ArrayList<>();
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
 
     public Long getId() {
         return id;
@@ -176,11 +176,11 @@ public class Event {
         this.imageUrl = imageUrl;
     }
 
-    public List<String> getPhotoUrls() {
-        return photoUrls;
+    public User getCreatedBy() {
+        return createdBy;
     }
 
-    public void setPhotoUrls(List<String> photoUrls) {
-        this.photoUrls = photoUrls;
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
     }
 }
