@@ -23,6 +23,12 @@ No es necesario instalar Java ni MySQL.
    La imagen del frontend se construye desde la carpeta `../gamer-spawn`. Si se
    clonó en otra ubicación, agregar `FRONTEND_DIR=<ruta>` al archivo `.env`.
 
+   Si los repositorios se descargan como ZIP desde GitHub, ambos deben
+   descomprimirse en la misma carpeta. GitHub agrega el sufijo `-main` al nombre
+   de cada carpeta, por lo que la del frontend debe renombrarse de
+   `gamer-spawn-main` a `gamer-spawn`. Otra opción es mantener el nombre y
+   agregar `FRONTEND_DIR=../gamer-spawn-main` al archivo `.env`.
+
 2. Crear el archivo `.env` con una contraseña de base de datos y una clave JWT
    aleatorias.
 
