@@ -20,7 +20,7 @@ public class RegisterController {
 
     private static final String DEFAULT_ROLE = "ROLE_USER";
     private static final Pattern USERNAME = Pattern.compile("[A-Za-z0-9_.-]{3,30}");
-    private static final Pattern EMAIL = Pattern.compile("[^@\\s]+@[^@\\s]+\\.[^@\\s]+");
+    static final Pattern EMAIL = Pattern.compile("[^@\\s]++@[^@\\s.]++(?:\\.[^@\\s.]++)++");
     private static final int MAX_EMAIL_LENGTH = 254;
     private static final int MIN_PASSWORD_LENGTH = 8;
     private static final int MAX_PASSWORD_BYTES = 72;
