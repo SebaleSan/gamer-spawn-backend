@@ -1,76 +1,59 @@
 # Backend GamerSpawn
 
-Backend de GamerSpawn desarrollado con Spring Boot. La aplicación usa MySQL,
-JWT para autenticación y se ejecuta en el puerto `8081`.
+API REST de GamerSpawn desarrollada con Spring Boot. Usa MySQL para almacenar
+los datos y JWT para la autenticación, y se ejecuta en el puerto `8081`. El
+frontend web está en
+[gamer-spawn](https://github.com/SebaleSan/gamer-spawn).
 
-## Requisitos
+## Ejecutar todo con Docker Compose (recomendado)
 
-- Java 21
-- Docker
-- MySQL ejecutándose en Docker
+Levanta MySQL, este backend y el frontend con un solo comando. El único
+requisito es [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+No es necesario instalar Java ni MySQL.
 
-## 1. Iniciar MySQL
+1. Clonar ambos repositorios en la misma carpeta y abrir una terminal en la
+   carpeta del backend:
 
-Crear el contenedor:
+   ```powershell
+   git clone https://github.com/SebaleSan/gamer-spawn-backend.git
+   git clone https://github.com/SebaleSan/gamer-spawn.git
+   cd gamer-spawn-backend
+   ```
 
-```cmd
-docker run --name mysql-gamerspawn -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql:latest
-```
+   La imagen del frontend se construye desde la carpeta `../gamer-spawn`. Si se
+   clonó en otra ubicación, agregar `FRONTEND_DIR=<ruta>` al archivo `.env`.
 
-Si el contenedor ya existe, iniciarlo con:
+2. Crear el archivo `.env` con una contraseña de base de datos y una clave JWT
+   aleatorias.
 
-```cmd
-docker start mysql-gamerspawn
-```
+   PowerShell:
 
-Crear la base de datos:
+   ```powershell
+   $bytes = New-Object byte[] 64
+   [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+   "DB_PASSWORD=$([guid]::NewGuid().ToString('N'))`nJWT_SECRET=$([Convert]::ToBase64String($bytes))" | Set-Content .env -Encoding ascii
+   ```
 
-```cmd
-docker exec -it mysql-gamerspawn mysql -uroot -ppassword -e "CREATE DATABASE IF NOT EXISTS gamerspawn;"
-```
+   Linux o macOS:
 
-La contraseña usada en el contenedor debe coincidir con
-`spring.datasource.password` en `src/main/resources/application.properties`.
+   ```bash
+   printf "DB_PASSWORD=%s\nJWT_SECRET=%s\n" "$(openssl rand -hex 16)" "$(openssl rand -base64 64 | tr -d '\n')" > .env
+   ```
 
-Para crear el esquema y cargar los eventos iniciales mediante un único script,
-ejecutar desde la carpeta `backend`:
+   `.env.example` muestra las variables requeridas. Git ignora el archivo `.env`.
 
-```cmd
-docker exec -i mysql-gamerspawn mysql -uroot -ppassword < database\gamerspawn.sql
-```
+3. Construir e iniciar los contenedores:
 
-El script recrea las tablas `event` y `event_media`. Los usuarios y sus
-contraseñas son generados por `DataSeeder` al iniciar la aplicación.
+   ```powershell
+   docker compose up -d --build
+   ```
 
-## 2. Generar y configurar la clave JWT
+   La primera construcción tarda algunos minutos. Hibernate crea las tablas y
+   los usuarios de prueba, los eventos de ejemplo y sus fotos se cargan
+   automáticamente.
 
-La aplicación necesita una variable de entorno llamada `JWT_SECRET`. En
-PowerShell, genera una clave aleatoria de 64 bytes y configúrala para el
-usuario actual:
-
-```powershell
-$bytes = New-Object byte[] 64
-[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
-[Environment]::SetEnvironmentVariable("JWT_SECRET", [Convert]::ToBase64String($bytes), "User")
-```
-
-
-## 3. Ejecutar el backend
-
-Desde esta carpeta:
-
-```cmd
-mvnw.cmd spring-boot:run
-```
-
-La aplicación quedará disponible en:
-
-```text
-http://localhost:8081
-```
-
-Hibernate crea o actualiza las tablas automáticamente. Si no se utiliza el
-script SQL, al iniciar `DataSeeder` crea estos usuarios si todavía no existen:
+4. Abrir http://localhost:8080 e iniciar sesión con uno de los usuarios de
+   prueba.
 
 | Usuario | Contraseña | Rol |
 |---|---|---|
@@ -78,35 +61,86 @@ script SQL, al iniciar `DataSeeder` crea estos usuarios si todavía no existen:
 | `user1` | `user1` | `ROLE_USER` |
 | `user2` | `user2` | `ROLE_USER` |
 
-## 4. Probar con Postman
+También se pueden crear cuentas nuevas desde la página de registro.
 
-### Login
+Para detener los contenedores, ejecutar `docker compose down`. Con `-v` además
+se elimina el volumen de la base de datos.
 
-- Método: `POST`
-- URL: `http://localhost:8081/login`
-- Body: `x-www-form-urlencoded`
+Los puertos `8080` y `8081` deben estar libres antes de iniciar.
 
-| Key | Value |
-|---|---|
-| `user` | `admin` |
-| `encryptedPass` | `admin` |
+## Ejecutar localmente sin Docker Compose
 
-La respuesta es un token JWT. Cópiar para las siguientes solicitudes.
+Requisitos: Java 21 y Docker (para MySQL).
 
-### Endpoint público
+1. Iniciar MySQL:
 
-```text
-GET http://localhost:8081/api/events
+   ```powershell
+   docker run --name mysql-gamerspawn -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=gamerspawn -p 3306:3306 -d mysql:8.4
+   ```
+
+   Si el contenedor ya existe, iniciarlo con `docker start mysql-gamerspawn`.
+   La contraseña debe coincidir con `spring.datasource.password` en
+   `src/main/resources/application.properties`.
+
+2. Crear la variable de entorno `JWT_SECRET` para el usuario actual:
+
+   ```powershell
+   $bytes = New-Object byte[] 64
+   [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+   [Environment]::SetEnvironmentVariable("JWT_SECRET", [Convert]::ToBase64String($bytes), "User")
+   ```
+
+   Después, abrir una terminal nueva para que la variable se cargue.
+
+3. Ejecutar el backend:
+
+   ```powershell
+   .\mvnw.cmd spring-boot:run
+   ```
+
+Al iniciar, Hibernate crea o actualiza las tablas, y `DataSeeder` crea los
+usuarios de prueba, los eventos de ejemplo y sus fotos si todavía no existen.
+
+`database/gamerspawn.sql` es un script opcional que reconstruye el esquema con
+los eventos de ejemplo. Elimina todas las tablas, incluidos los usuarios, los
+comentarios y las valoraciones:
+
+```powershell
+Get-Content database\gamerspawn.sql | docker exec -i mysql-gamerspawn mysql -uroot -ppassword
 ```
 
-No requiere token.
+## API
 
-### Endpoint privado
+### Públicas
 
-```text
-GET http://localhost:8081/api/private/events
-```
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/login` | Devuelve un JWT. Parámetros de formulario `user` y `encryptedPass` |
+| `POST` | `/register` | Crea un usuario. Cuerpo JSON `username`, `email`, `password` |
+| `GET` | `/api/events` | Lista los eventos |
+| `GET` | `/api/events/search` | Filtra eventos por `title`, `videoGame`, `eventType`, `category`, `country`, `city`, `modality` |
 
-En Postman seleccionar **Authorization > Bearer Token** y pegar el JWT recibido.
+### Privadas
+
+Requieren el encabezado `Authorization: Bearer <token>`.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/private/events` | Lista los eventos |
+| `GET` | `/api/private/events/{id}` | Detalle de un evento |
+| `GET` | `/api/private/events/mine` | Eventos creados por el usuario actual |
+| `POST` | `/api/private/events` | Crea un evento |
+| `GET`, `POST` | `/api/private/events/{eventId}/comments` | Lista o agrega comentarios. Cuerpo JSON `content` |
+| `PUT`, `DELETE` | `/api/private/events/{eventId}/comments/{commentId}` | Edita o elimina un comentario (autor o administrador) |
+| `GET`, `PUT`, `DELETE` | `/api/private/events/{eventId}/rating` | Obtiene, asigna o elimina la valoración del usuario. Cuerpo JSON `score` (1 a 5) |
+| `GET`, `POST` | `/api/private/events/{eventId}/media` | Lista o agrega la URL de una foto o un video. Cuerpo JSON `type` (`PHOTO` o `VIDEO`) y `url` (https) |
+| `DELETE` | `/api/private/events/{eventId}/media/{mediaId}` | Elimina una foto o un video (autor o administrador) |
 
 Las rutas bajo `/api/admin/**` requieren el rol `ROLE_ADMIN`.
+
+### Ejemplo con Postman
+
+1. `POST http://localhost:8081/login` con un cuerpo `x-www-form-urlencoded`:
+   `user=admin` y `encryptedPass=admin`. Copiar el token de la respuesta.
+2. `GET http://localhost:8081/api/private/events` con
+   **Authorization > Bearer Token** configurado con ese token.
