@@ -1,0 +1,43 @@
+name: gamerspawn
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: gamerspawn
+      MYSQL_USER: gamerspawn
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -ugamerspawn -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  backend:
+    build: .
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/gamerspawn
+      SPRING_DATASOURCE_USERNAME: gamerspawn
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build: ${FRONTEND_DIR:-../gamer-spawn}
+    environment:
+      BACKEND_BASEURL: http://backend:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

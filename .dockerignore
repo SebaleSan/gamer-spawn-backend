@@ -1,0 +1,6 @@
+target/
+.git/
+.sonar/
+.scannerwork/
+.vscode/
+.env
